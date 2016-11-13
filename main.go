@@ -94,7 +94,7 @@ func handleOne(serviceName string) error {
 	if err != nil {
 		return err
 	} else if l == 0 {
-		logger.Log.Info("", zap.String("args", strings.Join(args, " ")), zap.Int("count", l))
+		logger.Log.Info(serviceName, zap.String("args", strings.Join(args, " ")), zap.Int("count", l))
 		return nil
 	}
 
@@ -110,7 +110,7 @@ func handleOne(serviceName string) error {
 	if err := writeRecords(records); err != nil {
 		return err
 	}
-	logger.Log.Info("", zap.String("args", strings.Join(args, " ")), zap.Int("count", l))
+	logger.Log.Info(serviceName, zap.String("args", strings.Join(args, " ")), zap.Int("count", l))
 
 	return nil
 }
