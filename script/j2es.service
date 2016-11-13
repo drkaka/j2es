@@ -1,0 +1,8 @@
+[Unit]
+Description=j2es
+
+[Service]
+Type=simple
+User=leeq
+ExecStart=/home/leeq/j2es/j2es -path /home/leeq/j2es/config.json
+WorkingDirectory=/home/leeq/j2es
