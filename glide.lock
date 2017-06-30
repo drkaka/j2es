@@ -1,6 +1,8 @@
-hash: bffb54354c46b4ea6bd1e301a3f8ed5cdd629c3140b2f11e9fd0d2c0e917fd03
-updated: 2017-06-30T15:29:06.2401789+08:00
+hash: 15b55eae9ac09f353bad05a7f87f25ffa1d0b9a064feaec43a9db615505c5dee
+updated: 2017-06-30T18:02:04.3072236+08:00
 imports:
+- name: github.com/asaskevich/govalidator
+  version: 4918b99a7cb949bb295f3c7bbaf24b577d806e35
 - name: github.com/drkaka/lg
   version: 2da913ec4fcfd0f6774de89b4e24a5200a1845b2
 - name: github.com/drkaka/ulid

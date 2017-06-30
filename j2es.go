@@ -135,25 +135,34 @@ func recordStatus(started int64, success bool) error {
 func Start(configFile string) error {
 	// ms
 	started := time.Now().UnixNano() / 1e6
+	success := false
+
+	defer func() {
+		if r := recover(); r != nil {
+			lg.L(nil).Warn("panic", zap.Any("error", r))
+		}
+
+		if err := recordStatus(started, success); err != nil {
+			lg.L(nil).Error("error recording", zap.Error(err))
+		}
+	}()
 
 	if err := makeConfig(configFile); err != nil {
 		lg.L(nil).Error("error make config", zap.Error(err))
-		if err1 := recordStatus(started, false); err1 != nil {
-			lg.L(nil).Error("error recording", zap.Error(err1))
-		}
 		return err
 	}
 
-	success := true
+	if err := uploader.PrepareUploader(configInfo.EsHosts); err != nil {
+		lg.L(nil).Error("error prepare uploader", zap.Error(err))
+		return err
+	}
+
+	success = true
 	for _, one := range configInfo.Services {
 		if err := handleOne(one); err != nil {
 			success = false
 			lg.L(nil).Error("error handle service", zap.Error(err), zap.String("service", one))
 		}
-	}
-
-	if err := recordStatus(started, success); err != nil {
-		lg.L(nil).Error("error recording", zap.Error(err))
 	}
 
 	return nil

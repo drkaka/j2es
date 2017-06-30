@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/asaskevich/govalidator"
 	"github.com/drkaka/lg"
 	"go.uber.org/zap"
 )
@@ -70,7 +71,7 @@ func GetMessages(service, cmdName string, arg ...string) ([]Result, error) {
 		// check whether the log comes from the service.
 		// this will omit system messages like start or stop
 		if result.SysdUnit != strings.Join([]string{service, "service"}, ".") {
-			lg.L(nil).Debug("escape", zap.String("unit", result.SysdUnit))
+			lg.L(nil).Debug("not service unit", zap.String("unit", result.SysdUnit))
 			continue
 		}
 
@@ -80,6 +81,11 @@ func GetMessages(service, cmdName string, arg ...string) ([]Result, error) {
 		real, err := strconv.Unquote(string(result.Message))
 		if err != nil {
 			return results, err
+		}
+
+		if !govalidator.IsJSON(string(real)) {
+			lg.L(nil).Debug("not valid json", zap.String("message", string(real)))
+			continue
 		}
 		one.Message = []byte(real)
 

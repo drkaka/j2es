@@ -12,7 +12,7 @@ func main() {
 	app := cli.NewApp()
 	app.Name = "j2es"
 	app.Usage = "command line tool to ship logs from Journal to ElasticSearch"
-	app.Version = "0.0.1"
+	app.Version = "0.0.3"
 
 	app.Flags = []cli.Flag{
 		cli.BoolFlag{
