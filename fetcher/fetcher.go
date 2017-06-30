@@ -3,11 +3,12 @@ package fetcher
 import (
 	"bufio"
 	"encoding/json"
-	"j2es/logger"
 	"os/exec"
 	"strconv"
+	"strings"
 
-	"github.com/uber-go/zap"
+	"github.com/drkaka/lg"
+	"go.uber.org/zap"
 )
 
 // Result to define a journal message result.
@@ -29,12 +30,12 @@ type JMessage struct {
 	PID           json.RawMessage `json:"_PID,omitempty"`
 	UID           json.RawMessage `json:"_UID,omitempty"`
 	GID           json.RawMessage `json:"_GID,omitempty"`
-	Comm          string          `json:"_COMM"`
+	Comm          json.RawMessage `json:"_COMM,omitempty"`
 	Exe           json.RawMessage `json:"_EXE,omitempty"`
 	CmdLine       json.RawMessage `json:"_CMDLINE,omitempty"`
 	CapEffective  json.RawMessage `json:"_CAP_EFFECTIVE,omitempty"`
 	SysdGroup     json.RawMessage `json:"_SYSTEMD_CGROUP,omitempty"`
-	SysdUnit      json.RawMessage `json:"_SYSTEMD_UNIT,omitempty"`
+	SysdUnit      string          `json:"_SYSTEMD_UNIT"`
 	SysdSlice     json.RawMessage `json:"_SYSTEMD_SLICE,omitempty"`
 	MachineID     json.RawMessage `json:"_MACHINE_ID,omitempty"`
 	Hostname      json.RawMessage `json:"_HOSTNAME,omitempty"`
@@ -42,9 +43,9 @@ type JMessage struct {
 }
 
 // GetMessages to get journal messages from a command.
-func GetMessages(service, name string, arg ...string) ([]Result, error) {
+func GetMessages(service, cmdName string, arg ...string) ([]Result, error) {
 	var results []Result
-	cmd := exec.Command(name, arg...)
+	cmd := exec.Command(cmdName, arg...)
 	cmdReader, err := cmd.StdoutPipe()
 	if err != nil {
 		return results, err
@@ -53,22 +54,23 @@ func GetMessages(service, name string, arg ...string) ([]Result, error) {
 	if err := cmd.Start(); err != nil {
 		return results, err
 	}
-	logger.Log.Debug("CMD started.")
+	lg.L(nil).Debug("CMD started.")
 
 	scanner := bufio.NewScanner(cmdReader)
 	for scanner.Scan() {
 		var result JMessage
 
 		b := scanner.Bytes()
-		logger.Log.Debug("", zap.String("line", string(scanner.Bytes())))
+		lg.L(nil).Debug("", zap.String("line", string(scanner.Bytes())))
 
 		if err := json.Unmarshal(b, &result); err != nil {
 			return results, err
 		}
 
-		// check whether the log come from applicaiton.
-		if result.Comm != service {
-			logger.Log.Debug("escape", zap.String("comm", result.Comm))
+		// check whether the log comes from the service.
+		// this will omit system messages like start or stop
+		if result.SysdUnit != strings.Join([]string{service, "service"}, ".") {
+			lg.L(nil).Debug("escape", zap.String("unit", result.SysdUnit))
 			continue
 		}
 
@@ -84,25 +86,4 @@ func GetMessages(service, name string, arg ...string) ([]Result, error) {
 		results = append(results, one)
 	}
 	return results, nil
-
-	// lines := bytes.Split(out, []byte("\n"))
-	// logger.Log.Debug("", zap.Int("lines", len(lines)))
-
-	// for i := 0; i < len(lines); i++ {
-	// 	if len(lines[i]) == 0 {
-	// 		continue
-	// 	}
-
-	// 	var result JMessage
-	// 	if err := json.Unmarshal(lines[i], &result); err != nil {
-	// 		return results, err
-	// 	}
-
-	// 	// check whether the log come from applicaiton.
-	// 	if result.Comm != name {
-	// 		logger.Log.Debug("escape", zap.String("comm", result.Comm))
-	// 		continue
-	// 	}
-
-	// }
 }

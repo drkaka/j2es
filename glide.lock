@@ -1,0 +1,55 @@
+hash: bffb54354c46b4ea6bd1e301a3f8ed5cdd629c3140b2f11e9fd0d2c0e917fd03
+updated: 2017-06-30T15:29:06.2401789+08:00
+imports:
+- name: github.com/drkaka/lg
+  version: 2da913ec4fcfd0f6774de89b4e24a5200a1845b2
+- name: github.com/drkaka/ulid
+  version: a4078d88d430f7f5c443e60820664d0eef7a1cc8
+- name: github.com/influxdata/influxdb
+  version: 8550fabf89769875623fe5b0c30965a06073869c
+  subpackages:
+  - client/v2
+  - models
+  - pkg/escape
+- name: github.com/pkg/errors
+  version: c605e284fe17294bda444b34710735b29d1a9d90
+- name: github.com/urfave/cli
+  version: 0bdeddeeb0f650497d603c4ad7b20cfe685682f6
+- name: go.uber.org/atomic
+  version: 4e336646b2ef9fc6e47be8e21594178f98e5ebcf
+- name: go.uber.org/zap
+  version: 9cabc84638b70e564c3dab2766efcb1ded2aac9f
+  subpackages:
+  - buffer
+  - internal/bufferpool
+  - internal/color
+  - internal/exit
+  - internal/multierror
+  - zapcore
+- name: gopkg.in/olivere/elastic.v5
+  version: 3113f9b9ad37509fe5f8a0e5e91c96fdc4435e26
+  subpackages:
+  - uritemplates
+- name: gopkg.in/yaml.v2
+  version: cd8b52f8269e0feb286dfeef29f8fe4d5b397e0b
+testImports:
+- name: github.com/davecgh/go-spew
+  version: 346938d642f2ec3594ed81d874461961cd0faa76
+  subpackages:
+  - spew
+- name: github.com/mattn/goveralls
+  version: 9d621f6940639bf287ecbb6f585a2c26eeba3bbe
+- name: github.com/pborman/uuid
+  version: e790cca94e6cc75c7064b1332e63811d4aae1a53
+- name: github.com/pmezard/go-difflib
+  version: d8ed2627bdf02c080bf22230dbb337003b7aba2d
+  subpackages:
+  - difflib
+- name: github.com/stretchr/testify
+  version: 4d4bfba8f1d1027c4fdbe371823030df51419987
+  subpackages:
+  - assert
+- name: golang.org/x/tools
+  version: 1b3bb8de7d39fe135abc674c1e6d642cce854d4a
+  subpackages:
+  - cover

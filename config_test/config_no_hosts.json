@@ -1,4 +1,0 @@
-{
-    "services" : ["a", "b"],
-    "record_path" : "config_test/record_path.json"
-}

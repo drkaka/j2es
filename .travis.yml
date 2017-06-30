@@ -1,0 +1,30 @@
+language: go
+sudo: false
+go:
+- 1.8.x
+env:
+  global:
+  - TEST_TIMEOUT_SCALE=10
+install:
+- go get -v github.com/Masterminds/glide
+- cd $GOPATH/src/github.com/Masterminds/glide && go install && cd -
+- glide install
+- go install ./vendor/github.com/mattn/goveralls
+script:
+- go test -race -v
+after_success:
+- goveralls -service=travis-ci
+notifications:
+  slack:
+    secure: XQLT7v8myPMw7M+Wejt/ss8atcMJmgzV23xxzxSUTdDW4E2YM34DZYJoZ9SmSjUE+1XIUEYsK0/B7TsOt+rhsZMYE3b8rQUuNZh84iTktS1rUy/6zdXDhzNd8HAL4pICcFhpHFYgf6r2rjcJAm2EcXtWvpHhNSlGRKkQ5y2JlrfUqzCt9qidVf02223ftOBS5sb0z9hwkMfYmX374c09kSbIhmkPe542q7X4G8dKBxgsmRMUVQo1LcN5PztXyWubo+1myfFgAP1dQAhllmCn9D9B+xL4rA95D38IwGznHDopgjJwYLBEsstnlS7qSMMnl3nWBIFhWf5UqEt3Tbb4jU/2odIDxEacmOBNKzMjix+4oilDeX0H4OhlQpZUSvzs7FLphGurGSVR8ZSg3kwiZ36cZKQcWO4G+uBa7W8i3xm7N/FM44tp7tS/4B3o23yIXBHuSy5kbwprxp1CZwkAR5zSEszsMZCHYMlOJC/4eCGOUCbg+vGM4Y1Yk395KT5lIMdi9Tmb8CKmk/shQI5uC4KDTZ+7ZPLmwssTng1ym8CVs5ixSN0iRG8Hvu+SEQsWG4NWMRgmIj5f3/A8jZYV8i6rACZKff1Nvbn9JNsuRxggsHI00Tbpv7sIHvYkETKTtg9aKJRq8sfLetMFJOJS/UzCd6HuMq4+hWJc/nP0RPU=
+deploy:
+  provider: releases
+  skip_cleanup: true
+  api_key:
+    secure: TVmQAdLKYy6sWX8jsiXYX1BtCuWbqEdq2wrDK2drZjnpPiWZRbq0eY1mbYa+BXZj+2fsqTFfzpYuvlWwEEscYof1dsTPNKiNsAqEKmDqkMtpT4qXdhMCTh1LBocPdoSiyZ52Lea7Jhimqdu+6oqLmEHAhRQoslLtXSsOmzHD4OOltc6uGg1YiZ+541AvmFq/lXi54alLmw4zOv9DZFlvTTiaYYSr1Y078FzqJHb8/5RAr6cMZtg4pAHXFDH6QNpmqzk6/N7hMj5faD/32x1LFadshfGYuya/dSxa5xzXM+t1vO0RHxtyv9AvmiRE/6DKt4K6Pra76YV0xJ9Fr7PK85tE+H1AXDjg+6V8fV4kKkjPqPTkVgA4WoB7ZGpWadxtClUynZ8STJ2/Zb7I/chJ6R/13Wk9nm5RIalkno3JafN6rG3ie9jrdgD4n7S+7495tD6F22nXJePje37JZ/Z7Zu0uMmrwoJW/HAlFQpUmYq2wkczFe4Cao91enMoyrWYH3o4678JJ4/+Zg4yXHQkybBG9rM+NX56QVdeUHlOqI9zIPhvorB5d7m7sqNKB5XnTp8Cnve6kOIM48ICDE2wDQJlM3KR/jnsvuYfnYnJX+M/bdXIfJIQKzdIAvUULMBFUaa2F4b3cML77BFnW+uFu/H3LeuWg0JTcR71ENMY4I4k=
+  file_glob: true
+  file: builds/*
+  on:
+    tags: true
+before_deploy: 
+  - ./build.sh $TRAVIS_TAG

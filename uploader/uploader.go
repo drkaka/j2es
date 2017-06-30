@@ -15,11 +15,11 @@ var (
 func PrepareUploader(urls []string) error {
 	c, err := es.NewClient(
 		es.SetURL(urls...),
-		es.SetMaxRetries(10),
+		es.SetMaxRetries(8),
 	)
 
 	if err != nil {
-		return errors.New("Failed to create ES client.")
+		return errors.New("failed to create ES client")
 	}
 
 	client = es.NewBulkService(c)

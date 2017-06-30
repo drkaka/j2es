@@ -1,0 +1,10 @@
+es_hosts: 
+    - http://192.168.1.210:9200
+services:
+    - a
+    - b
+influxdb:
+    host: http://192.168.1.1
+    username: abc
+    password: cba
+    db: test

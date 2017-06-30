@@ -1,0 +1,19 @@
+package: github.com/drkaka/j2es
+import:
+- package: github.com/drkaka/lg
+  version: ^1.0.3
+- package: gopkg.in/olivere/elastic.v5
+  version: "*"
+- package: github.com/influxdata/influxdb/client/v2
+- package: github.com/urfave/cli
+  version: ^1.19.1
+- package: gopkg.in/yaml.v2
+testImport:
+- package: github.com/stretchr/testify
+  subpackages:
+  - assert
+- package: github.com/mattn/goveralls
+- package: github.com/pborman/uuid
+- package: golang.org/x/tools
+  subpackages:
+  - cover
