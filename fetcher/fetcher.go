@@ -12,6 +12,11 @@ import (
 	"go.uber.org/zap"
 )
 
+const (
+	// 2K * 16 = 32K
+	maxLines = 16
+)
+
 // Result to define a journal message result.
 type Result struct {
 	Cursor  string
@@ -57,12 +62,15 @@ func GetMessages(service, cmdName string, arg ...string) ([]Result, error) {
 	}
 	lg.L(nil).Debug("CMD started.")
 
+	var bs []byte
+	lines := 0
+
 	scanner := bufio.NewScanner(cmdReader)
 	for scanner.Scan() {
 		var result JMessage
 
 		b := scanner.Bytes()
-		lg.L(nil).Debug("", zap.String("line", string(scanner.Bytes())))
+		// lg.L(nil).Debug("", zap.String("line", string(scanner.Bytes())))
 
 		if err := json.Unmarshal(b, &result); err != nil {
 			return results, err
@@ -75,21 +83,57 @@ func GetMessages(service, cmdName string, arg ...string) ([]Result, error) {
 			continue
 		}
 
-		var one Result
-		one.Cursor = result.Cursor
-
 		real, err := strconv.Unquote(string(result.Message))
 		if err != nil {
 			return results, err
 		}
 
-		if !govalidator.IsJSON(string(real)) {
-			lg.L(nil).Debug("not valid json", zap.String("message", string(real)))
+		if govalidator.IsJSON(string(real)) {
+			// Got an one line log
+			appendResult(results, Result{
+				Cursor:  result.Cursor,
+				Message: []byte(real),
+			})
+			// Situation that a well structured JSON exactly within a line of long log is very rare.
+			bs = []byte{}
+			lines = 0
 			continue
 		}
-		one.Message = []byte(real)
-
-		results = append(results, one)
+		if lines == 0 {
+			if real[0] == '{' {
+				// is the start of a long JSON
+				bs = []byte(real)
+				lines = 1
+			} else {
+				// invalid json
+				lg.L(nil).Debug("invalid json", zap.String("message", string(real)))
+			}
+		} else if lines == maxLines {
+			// reach the max lines
+			lg.L(nil).Debug("log too long", zap.String("message", string(bs)))
+			bs = []byte{}
+			lines = 0
+		} else {
+			// appending lines
+			bs = append(bs, []byte(real)...)
+			if govalidator.IsJSON(string(bs)) {
+				// Got a long log
+				appendResult(results, Result{
+					Cursor:  result.Cursor,
+					Message: bs,
+				})
+				bs = []byte{}
+				lines = 0
+				continue
+			} else {
+				// still not end
+				lines++
+			}
+		}
 	}
 	return results, nil
+}
+
+func appendResult(results []Result, one Result) {
+	results = append(results, one)
 }
