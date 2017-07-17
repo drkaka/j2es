@@ -7,7 +7,6 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/asaskevich/govalidator"
 	"github.com/drkaka/lg"
 	"go.uber.org/zap"
 )
@@ -48,6 +47,11 @@ type JMessage struct {
 	Message       json.RawMessage `json:"MESSAGE"`
 }
 
+func isJSON(bs []byte) bool {
+	var m map[string]json.RawMessage
+	return json.Unmarshal(bs, &m) == nil
+}
+
 // GetMessages to get journal messages from a command.
 func GetMessages(service, cmdName string, arg ...string) ([]Result, error) {
 	var results []Result
@@ -64,7 +68,6 @@ func GetMessages(service, cmdName string, arg ...string) ([]Result, error) {
 
 	var bs []byte
 	lines := 0
-
 	scanner := bufio.NewScanner(cmdReader)
 	for scanner.Scan() {
 		var result JMessage
@@ -88,9 +91,9 @@ func GetMessages(service, cmdName string, arg ...string) ([]Result, error) {
 			return results, err
 		}
 
-		if govalidator.IsJSON(string(real)) {
+		if isJSON([]byte(real)) {
 			// Got an one line log
-			appendResult(results, Result{
+			results = append(results, Result{
 				Cursor:  result.Cursor,
 				Message: []byte(real),
 			})
@@ -116,11 +119,13 @@ func GetMessages(service, cmdName string, arg ...string) ([]Result, error) {
 		} else {
 			// appending lines
 			bs = append(bs, []byte(real)...)
-			if govalidator.IsJSON(string(bs)) {
+			if isJSON(bs) {
 				// Got a long log
-				appendResult(results, Result{
+				realBS := make([]byte, len(bs))
+				copy(realBS, bs)
+				results = append(results, Result{
 					Cursor:  result.Cursor,
-					Message: bs,
+					Message: realBS,
 				})
 				bs = []byte{}
 				lines = 0
@@ -132,8 +137,4 @@ func GetMessages(service, cmdName string, arg ...string) ([]Result, error) {
 		}
 	}
 	return results, nil
-}
-
-func appendResult(results []Result, one Result) {
-	results = append(results, one)
 }
